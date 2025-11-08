@@ -1,0 +1,268 @@
+/* Custom Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+.animate-fade-in {
+    animation: fadeIn 1s ease-out;
+}
+
+.menu-card {
+    animation: slideInUp 0.5s ease-out;
+}
+
+/* Smooth scrolling */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #6da53d;
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #5a8833;
+}
+
+/* Menu card hover effects */
+.menu-card:hover {
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+.menu-card img {
+    transition: transform 0.3s ease;
+}
+
+.menu-card:hover img {
+    transform: scale(1.1);
+}
+
+/* Button pulse animation on hover */
+button:hover {
+    animation: pulse 1s infinite;
+}
+
+/* Cart count badge animation */
+#cart-count {
+    transition: all 0.3s ease;
+}
+
+#cart-count:not(:empty) {
+    animation: pulse 0.5s ease;
+}
+
+/* Modal backdrop animation */
+#cart-modal {
+    transition: opacity 0.3s ease;
+}
+
+#cart-modal:not(.hidden) {
+    opacity: 1;
+}
+
+/* Responsive typography */
+@media (max-width: 640px) {
+    h1 {
+        font-size: 1.5rem;
+    }
+
+    h2 {
+        font-size: 2rem;
+    }
+
+    .menu-card h3 {
+        font-size: 1rem;
+    }
+}
+
+/* Hero section gradient animation */
+section:first-of-type {
+    background-size: 200% 200%;
+    animation: gradientShift 15s ease infinite;
+}
+
+@keyframes gradientShift {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+/* Input focus effects */
+input:focus,
+textarea:focus {
+    transform: scale(1.02);
+    transition: all 0.2s ease;
+}
+
+/* Loading state for buttons */
+button:active {
+    transform: scale(0.95);
+}
+
+/* Price tag styling */
+.menu-card .absolute {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Smooth transitions for all interactive elements */
+a, button, input, textarea {
+    transition: all 0.3s ease;
+}
+
+/* Cart item animations */
+#cart-items > div {
+    animation: slideInUp 0.3s ease-out;
+}
+
+/* Hero section text shadow for better readability */
+.bg-gradient-to-r h2,
+.bg-gradient-to-r p {
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Floating effect for cart button */
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-5px);
+    }
+}
+
+nav button {
+    animation: float 3s ease-in-out infinite;
+}
+
+/* Image loading placeholder */
+img {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+img[src] {
+    animation: none;
+    background: none;
+}
+
+/* Print styles */
+@media print {
+    nav, footer, #cart-modal, button {
+        display: none !important;
+    }
+
+    .menu-card {
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .menu-card {
+        border: 2px solid #000;
+    }
+
+    button {
+        border: 2px solid currentColor;
+    }
+}
+
+/* Reduced motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* Focus styles for accessibility */
+a:focus,
+button:focus,
+input:focus,
+textarea:focus {
+    outline: 3px solid #6da53d;
+    outline-offset: 2px;
+}
+
+/* Mobile optimization */
+@media (max-width: 768px) {
+    .container {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+
+    #cart-modal > div > div {
+        margin: 1rem;
+        max-width: calc(100% - 2rem);
+    }
+}
+
+/* Landscape mobile optimization */
+@media (max-width: 896px) and (orientation: landscape) {
+    nav {
+        padding: 0.5rem 0;
+    }
+
+    nav img {
+        height: 2.5rem;
+    }
+
+    section {
+        padding: 2rem 0;
+    }
+}
