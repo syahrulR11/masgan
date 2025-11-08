@@ -287,8 +287,7 @@ function checkout() {
     const encodedMessage = encodeURIComponent(message);
 
     // WhatsApp number (without + or -)
-    // const whatsappNumber = '6285273598919';
-    const whatsappNumber = '6281902224757';
+    const whatsappNumber = '6285273598919';
 
     // Open WhatsApp
     const whatsappURL = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
