@@ -42,14 +42,14 @@ function renderMenu() {
     const menuGrid = document.getElementById('menu-grid');
     if (!menuGrid) return;
 
-    const cards = menuItems.map(item => {
+    const cards = menuItems.map((item, index) => {
         const priceLabel = `Rp ${item.price.toLocaleString('id-ID')}`;
         const escapedName = item.name.replace(/'/g, "\\'");
         return `
             <div class="menu-card bg-white rounded-2xl shadow-lg overflow-hidden transform transition-all duration-300 hover:scale-105 hover:shadow-2xl">
-                <div class="relative overflow-hidden bg-gray-100">
-                    <img src="${item.image}" alt="${item.name}" class="w-full h-48 object-contain">
-                    <div class="absolute top-0 right-0 bg-masgan-green text-white px-3 py-1 rounded-bl-lg font-bold">
+                <div class="relative overflow-hidden bg-masgan-dark-blue">
+                    <img src="${item.image}" alt="${item.name}" class="w-full h-48 object-contain relative z-10">
+                    <div class="absolute top-0 right-0 bg-masgan-green text-white px-3 py-1 rounded-bl-lg font-bold z-20">
                         ${priceLabel}
                     </div>
                 </div>
@@ -239,11 +239,18 @@ function removeFromCart(index) {
 // Checkout via WhatsApp
 function checkout() {
     const name = document.getElementById('customer-name').value.trim();
+    const phone = document.getElementById('customer-phone').value.trim();
     const address = document.getElementById('customer-address').value.trim();
 
     if (!name) {
         alert('Mohon isi nama Anda');
         document.getElementById('customer-name').focus();
+        return;
+    }
+
+    if (!phone) {
+        alert('Mohon isi nomor WhatsApp Anda');
+        document.getElementById('customer-phone').focus();
         return;
     }
 
@@ -269,6 +276,7 @@ function checkout() {
 
     // Build WhatsApp message
     let message = `*Pesanan Baru dari ${name}*\n\n`;
+    message += `*Nomor WhatsApp:* ${phone}\n`;
     message += `*Alamat Pengiriman:*\n${address}\n\n`;
     message += `*Detail Pesanan:*\n`;
 
@@ -299,6 +307,7 @@ function checkout() {
         saveCart();
         updateCartDisplay();
         document.getElementById('customer-name').value = '';
+        document.getElementById('customer-phone').value = '';
         document.getElementById('customer-address').value = '';
         document.getElementById('captcha-answer').value = '';
         generateCaptcha();
