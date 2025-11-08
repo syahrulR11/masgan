@@ -7,8 +7,75 @@ let currentCaptcha = {
     answer: 0
 };
 
+// Menu configuration
+const menuItems = [
+    { name: 'Coconut Original Big', price: 10000, image: 'images/menu/Coconut Original.png' },
+    { name: 'Coconut Original Small', price: 5000, image: 'images/menu/Coconut Original A Half.png' },
+    { name: 'Coconut Mix Fruit', price: 18000, image: 'images/menu/Coconut Mix.png' },
+    { name: 'Coconut Mix Durian', price: 18000, image: 'images/menu/Coconut Mix.png' },
+    { name: 'Coconut Jelly', price: 15000, image: 'images/menu/Coconut Jelly.png' },
+    { name: 'Coconut Jelly Mix Fruit', price: 23000, image: 'images/menu/Coconut Jelly Mix.png' },
+    { name: 'Coconut Copyor', price: 23000, image: 'images/menu/Coconut Kopyor.png' },
+    { name: 'Coconut Ice Cream Cone', price: 5000, image: 'images/menu/Coconut Ice Cream.png' },
+    { name: 'Coconut White Milk', price: 5000, image: 'images/menu/Coconut White Milk.png' },
+    { name: 'Coconut Chocolate Milk', price: 5000, image: 'images/menu/Coconut Chocolate Milk.png' },
+    { name: 'Coconut Guava', price: 5000, image: 'images/menu/Coconut Guava.png' },
+    { name: 'Coconut Soursop', price: 5000, image: 'images/menu/Coconut Soursop.png' },
+    { name: 'Coconut Mango', price: 5000, image: 'images/menu/Coconut Mango.png' },
+    { name: 'Coconut Vanilla', price: 5000, image: 'images/menu/Coconut Vanilla.png' },
+    { name: 'Coconut Melon', price: 5000, image: 'images/menu/Coconut Melon.png' },
+    { name: 'Coconut Mix Flavors', price: 5000, image: 'images/menu/Coconut Mix Flavors.png' },
+    { name: 'Coconut Lemon', price: 5000, image: 'images/menu/Coconut Lemon.png' },
+    { name: 'Coconut Pineapple', price: 5000, image: 'images/menu/Coconut Pineapple.png' },
+    { name: 'Coconut Coco Pandan', price: 5000, image: 'images/menu/Coco Pandan.png' },
+    { name: 'Coconut Strawberry', price: 5000, image: 'images/menu/Coconut Strawberry.png' },
+    { name: 'Coconut Lychee', price: 5000, image: 'images/menu/Coconut Lychee.png' },
+    { name: 'Coconut Roselle', price: 5000, image: 'images/menu/Coconut Rose.png' },
+    { name: 'Coconut Mocha', price: 5000, image: 'images/menu/Coconut Mocha.png' },
+    { name: 'Coconut Pomegranate', price: 5000, image: 'images/menu/Coconut Pomegranate.png' },
+    { name: 'Coconut Passion Fruit', price: 5000, image: 'images/menu/Coconut Passion Fruit.png' },
+    { name: 'Coconut Milk Banana', price: 5000, image: 'images/menu/Coconut Milk Banana.png' }
+];
+
+// Render menu cards dynamically to keep ordering and pricing consistent
+function renderMenu() {
+    const menuGrid = document.getElementById('menu-grid');
+    if (!menuGrid) return;
+
+    const cards = menuItems.map(item => {
+        const priceLabel = `Rp ${item.price.toLocaleString('id-ID')}`;
+        const escapedName = item.name.replace(/'/g, "\\'");
+        return `
+            <div class="menu-card bg-white rounded-2xl shadow-lg overflow-hidden transform transition-all duration-300 hover:scale-105 hover:shadow-2xl">
+                <div class="relative overflow-hidden bg-gray-100">
+                    <img src="${item.image}" alt="${item.name}" class="w-full h-48 object-contain">
+                    <div class="absolute top-0 right-0 bg-masgan-green text-white px-3 py-1 rounded-bl-lg font-bold">
+                        ${priceLabel}
+                    </div>
+                </div>
+                <div class="p-4">
+                    <h3 class="text-lg font-bold text-masgan-green mb-3">${item.name}</h3>
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center space-x-2">
+                            <button onclick="decreaseQty(this)" class="bg-gray-200 hover:bg-gray-300 text-gray-700 w-8 h-8 rounded-full font-bold">-</button>
+                            <input type="number" value="1" min="1" class="w-16 text-center border-2 border-masgan-green rounded-lg qty-input" readonly>
+                            <button onclick="increaseQty(this)" class="bg-gray-200 hover:bg-gray-300 text-gray-700 w-8 h-8 rounded-full font-bold">+</button>
+                        </div>
+                    </div>
+                    <button onclick="addToCart('${escapedName}', ${item.price}, this)" class="w-full bg-masgan-green hover:bg-green-600 text-white py-2 rounded-lg font-bold transition-all duration-300 shadow-md hover:shadow-lg">
+                        Tambah ke Keranjang
+                    </button>
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    menuGrid.innerHTML = cards;
+}
+
 // Load cart from localStorage on page load
 window.addEventListener('DOMContentLoaded', function() {
+    renderMenu();
     const savedCart = localStorage.getItem('masganCart');
     if (savedCart) {
         cart = JSON.parse(savedCart);
@@ -83,10 +150,11 @@ function addToCart(name, price, button) {
     // Show feedback animation
     const originalText = button.textContent;
     button.textContent = 'Ditambahkan!';
-    button.classList.add('bg-masgan-green');
+    const feedbackClass = 'bg-green-700';
+    button.classList.add(feedbackClass);
     setTimeout(() => {
         button.textContent = originalText;
-        button.classList.remove('bg-masgan-green');
+        button.classList.remove(feedbackClass);
     }, 1000);
 }
 
@@ -219,7 +287,8 @@ function checkout() {
     const encodedMessage = encodeURIComponent(message);
 
     // WhatsApp number (without + or -)
-    const whatsappNumber = '6285273598919';
+    // const whatsappNumber = '6285273598919';
+    const whatsappNumber = '6281902224757';
 
     // Open WhatsApp
     const whatsappURL = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
@@ -239,13 +308,16 @@ function checkout() {
 }
 
 // Smooth scroll for menu link
-document.querySelector('a[href="#menu"]').addEventListener('click', function(e) {
-    e.preventDefault();
-    document.getElementById('menu').scrollIntoView({
-        behavior: 'smooth',
-        block: 'start'
+const menuLink = document.querySelector('a[href="#menu"]');
+if (menuLink) {
+    menuLink.addEventListener('click', function(e) {
+        e.preventDefault();
+        document.getElementById('menu').scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+        });
     });
-});
+}
 
 // Close cart modal when clicking outside
 document.getElementById('cart-modal').addEventListener('click', function(e) {
