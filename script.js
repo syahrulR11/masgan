@@ -29,7 +29,7 @@ const masganConfig = {
             id: 'kalangnyar',
             name: 'MasGan Cabang Kalangnyar',
             shortName: 'Cabang Kalangnyar',
-            address: 'Jln. Maulana Yusuf, Kp. Jembatan Keong, Kalangnyar, Lebak',
+            address: 'Jln. Maulana Yusuf, Kp. Jembatan Keong\nRT 02, RW 02, Desa Aweh\nKec. Kalanganyar, Lebak, Banten\n42312',
             whatsapp: '6285273598919',
             location: { lat: -6.360048728393978, lng: 106.2416457137535 },
             deliveryRatePerKm: 2000,
@@ -290,9 +290,127 @@ function renderMenu() {
     menuGrid.innerHTML = cards;
 }
 
+function renderBranchList(elementId, options = {}) {
+    const listElement = document.getElementById(elementId);
+    if (!listElement) return;
+
+    const branches = Array.isArray(masganConfig.branches) ? masganConfig.branches : [];
+    const {
+        itemClasses = '',
+        nameClasses = '',
+        addressClasses = '',
+        linkClasses = '',
+        emptyClasses = 'text-sm text-gray-600 italic col-span-full text-center',
+        emptyText = 'Cabang baru akan segera hadir.'
+    } = options;
+
+    if (!branches.length) {
+        listElement.innerHTML = `<li class="${emptyClasses}">${emptyText}</li>`;
+        return;
+    }
+
+    listElement.innerHTML = branches.map(branch => {
+        const shortName = branch.shortName || branch.name || 'Cabang MasGan';
+        const formattedAddress = formatMultilineText(branch.address);
+        const addressMarkup = formattedAddress
+            ? `<p class="${addressClasses}">${formattedAddress}</p>`
+            : '';
+        const whatsappNumber = branch.whatsapp || masganConfig.defaultWhatsapp;
+        const contactMarkup = whatsappNumber
+            ? `<p class="mt-3"><a href="tel:${whatsappNumber}" target="_blank" rel="noopener" class="${linkClasses}">Hubungi Cabang</a></p>`
+            : '';
+
+        return `
+            <li class="${itemClasses}">
+                <p class="${nameClasses}">${shortName}</p>
+                ${addressMarkup}
+                ${contactMarkup}
+            </li>
+        `;
+    }).join('');
+}
+
+function renderBranchCards() {
+    const cardsContainer = document.getElementById('branch-card-list');
+    if (!cardsContainer) return;
+
+    const branches = Array.isArray(masganConfig.branches) ? masganConfig.branches : [];
+    if (!branches.length) {
+        cardsContainer.innerHTML = `
+            <div class="w-full bg-white text-masgan-green rounded-2xl shadow-xl p-8 text-center text-masgan-dark-blue/70">
+                Cabang baru akan segera hadir.
+            </div>
+        `;
+        return;
+    }
+
+    cardsContainer.innerHTML = branches.map(branch => {
+        const shortName = branch.shortName || branch.name || 'Cabang MasGan';
+        const formattedAddress = formatMultilineText(branch.address);
+        const addressMarkup = formattedAddress
+            ? `<p class="text-gray-700 leading-relaxed">${formattedAddress}</p>`
+            : '';
+        const whatsappNumber = branch.whatsapp || masganConfig.defaultWhatsapp;
+        const phoneMarkup = whatsappNumber
+            ? `
+                <div class="flex items-center mt-4">
+                    <svg class="w-6 h-6 text-masgan-green mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"></path>
+                    </svg>
+                    <a href="https://wa.me/${whatsappNumber}" target="_blank" rel="noopener" class="text-masgan-green font-bold hover:underline">
+                        ${formatPhoneDisplay(whatsappNumber)}
+                    </a>
+                </div>
+            `
+            : '';
+
+        return `
+            <div class="w-full bg-white text-masgan-green rounded-2xl shadow-xl p-8">
+                <div class="flex items-start space-x-4">
+                    <svg class="w-8 h-8 text-masgan-green flex-shrink-0 mt-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path>
+                    </svg>
+                    <div>
+                        <h3 class="font-bold text-xl mb-2 text-masgan-dark-blue">${shortName}</h3>
+                        ${addressMarkup}
+                        ${phoneMarkup}
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function formatPhoneDisplay(phone) {
+    if (!phone) return '';
+    if (phone.startsWith('62')) {
+        return `0${phone.slice(2)}`;
+    }
+    return phone;
+}
+
+function formatMultilineText(text = '') {
+    if (typeof text !== 'string' || !text.trim()) return '';
+    return text.replace(/\n/g, '<br>');
+}
+
+function renderAllBranchLists() {
+    renderBranchCards();
+
+    renderBranchList('footer-branch-list', {
+        itemClasses: 'bg-white/5 border border-white/10 rounded-xl p-4',
+        nameClasses: 'font-semibold text-white',
+        addressClasses: 'text-sm text-white/80 leading-relaxed mt-1',
+        linkClasses: 'inline-flex items-center text-sm font-semibold text-masgan-green hover:text-white transition-colors',
+        emptyClasses: 'text-sm text-white/70 italic col-span-full text-center',
+        emptyText: 'Cabang baru akan segera hadir.'
+    });
+}
+
 // Load cart from localStorage on page load
 window.addEventListener('DOMContentLoaded', function() {
     renderMenu();
+    renderAllBranchLists();
     const savedCart = localStorage.getItem('masganCart');
     if (savedCart) {
         cart = JSON.parse(savedCart);
