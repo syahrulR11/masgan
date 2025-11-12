@@ -8,6 +8,17 @@ let currentCaptcha = {
 };
 
 const CUSTOMER_PROFILE_KEY = 'masganCustomerProfile';
+const PAYMENT_METHODS = {
+    cod: {
+        value: 'cod',
+        label: 'COD / Bayar di Tempat'
+    },
+    transfer: {
+        value: 'transfer',
+        label: 'Transfer Bank',
+        account: '7087361688 (Bank Syariah Indonesia) - Risky Dwi Amalia'
+    }
+};
 
 // Branch and delivery configuration
 const masganConfig = {
@@ -20,29 +31,9 @@ const masganConfig = {
             shortName: 'Cabang Kalangnyar',
             address: 'Jln. Maulana Yusuf, Kp. Jembatan Keong, Kalangnyar, Lebak',
             whatsapp: '6285273598919',
-            location: { lat: -6.380861, lng: 106.162109 },
-            deliveryRatePerKm: 1000,
-            minDeliveryFee: 5000
-        },
-        {
-            id: 'rangkasbitung',
-            name: 'MasGan Cabang Rangkasbitung',
-            shortName: 'Cabang Rangkasbitung',
-            address: 'Jl. Multatuli No. 15, Rangkasbitung',
-            whatsapp: '6285273598919',
-            location: { lat: -6.352764, lng: 106.249546 },
-            deliveryRatePerKm: 1000,
-            minDeliveryFee: 5000
-        },
-        {
-            id: 'cibinong',
-            name: 'MasGan Cabang Cibinong',
-            shortName: 'Cabang Cibinong',
-            address: 'Jl. Tegar Beriman No.1, Pakansari, Kec. Cibinong, Kabupaten Bogor',
-            whatsapp: '6285273598919',
-            location: { lat: -6.484448505246412, lng: 106.84219951294875 },
-            deliveryRatePerKm: 1000,
-            minDeliveryFee: 5000
+            location: { lat: -6.360048728393978, lng: 106.2416457137535 },
+            deliveryRatePerKm: 2000,
+            minDeliveryFee: 8000
         }
     ]
 };
@@ -214,6 +205,25 @@ function initCustomerProfilePersistence() {
     });
 }
 
+function initPaymentMethodSelection() {
+    const radios = document.querySelectorAll('input[name="payment-method"]');
+    const transferInfo = document.getElementById('transfer-info');
+    if (!radios.length) return;
+
+    const updateTransferVisibility = () => {
+        const selected = document.querySelector('input[name="payment-method"]:checked');
+        if (!transferInfo) return;
+        if (selected && selected.value === PAYMENT_METHODS.transfer.value) {
+            transferInfo.classList.remove('hidden');
+        } else {
+            transferInfo.classList.add('hidden');
+        }
+    };
+
+    radios.forEach(radio => radio.addEventListener('change', updateTransferVisibility));
+    updateTransferVisibility();
+}
+
 // Menu configuration
 const menuItems = [
     { name: 'Coconut Original Big', price: 10000, image: 'images/menu/Coconut Original.webp' },
@@ -289,6 +299,7 @@ window.addEventListener('DOMContentLoaded', function() {
         updateCartDisplay();
     }
     initCustomerProfilePersistence();
+    initPaymentMethodSelection();
     // Initialize captcha
     generateCaptcha();
 });
@@ -473,6 +484,9 @@ function checkout() {
     const name = document.getElementById('customer-name').value.trim();
     const phone = document.getElementById('customer-phone').value.trim();
     const address = document.getElementById('customer-address').value.trim();
+    const paymentMethodInput = document.querySelector('input[name="payment-method"]:checked');
+    const paymentMethod = paymentMethodInput ? paymentMethodInput.value : PAYMENT_METHODS.cod.value;
+    const paymentConfig = PAYMENT_METHODS[paymentMethod] || PAYMENT_METHODS.cod;
 
     if (!name) {
         alert('Mohon isi nama Anda');
@@ -530,6 +544,10 @@ function checkout() {
 
     message += `Hari Tanggal/Jam: ${dateFormatter.format(orderDate)}, ${formattedTime} WIB\n`;
     message += `Nama: *${name}*\n`;
+    message += `Metode Pembayaran: *${paymentConfig.label}*\n`;
+    if (paymentMethod === PAYMENT_METHODS.transfer.value) {
+        message += `Rekening Transfer: ${PAYMENT_METHODS.transfer.account}\n`;
+    }
     message += `HP: *${phone}*\n`;
     message += `Alamat: ${address}\n`;
     if (customerLocation) {

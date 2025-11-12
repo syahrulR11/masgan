@@ -148,6 +148,32 @@
                             </div>
                         </div>
 
+                        <div class="bg-gray-50 border-2 border-gray-300 rounded-lg p-4 space-y-4">
+                            <p class="text-sm font-semibold text-gray-700">Metode Pembayaran</p>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <label class="flex items-start space-x-3 bg-white border-2 border-gray-200 rounded-lg p-3 cursor-pointer hover:border-masgan-green transition-colors">
+                                    <input type="radio" name="payment-method" value="cod" class="mt-1 text-masgan-green focus:ring-masgan-green" checked>
+                                    <div>
+                                        <p class="font-semibold text-masgan-dark-blue">COD / Bayar di Tempat</p>
+                                        <p class="text-xs text-gray-500">Bayar pesanan saat diterima.</p>
+                                    </div>
+                                </label>
+                                <label class="flex items-start space-x-3 bg-white border-2 border-gray-200 rounded-lg p-3 cursor-pointer hover:border-masgan-green transition-colors">
+                                    <input type="radio" name="payment-method" value="transfer" class="mt-1 text-masgan-green focus:ring-masgan-green">
+                                    <div>
+                                        <p class="font-semibold text-masgan-dark-blue">Transfer Bank</p>
+                                        <p class="text-xs text-gray-500">Bayar lebih dulu via rekening MasGan.</p>
+                                    </div>
+                                </label>
+                            </div>
+                            <div id="transfer-info" class="bg-white border border-masgan-green rounded-lg p-3 hidden">
+                                <p class="text-xs uppercase tracking-wide text-gray-500">Rekening Transfer</p>
+                                <p class="font-bold text-masgan-dark-blue text-lg">7087361688</p>
+                                <p class="text-sm text-gray-600">Bank Syariah Indonesia - Risky Dwi Amalia</p>
+                                <p class="text-xs text-gray-500 mt-2">Kirim bukti transfer saat konfirmasi di WhatsApp.</p>
+                            </div>
+                        </div>
+
                         <!-- Captcha -->
                         <div class="bg-gray-50 border-2 border-gray-300 rounded-lg p-4">
                             <label class="block text-sm font-semibold text-gray-700 mb-2">Verifikasi Keamanan</label>
