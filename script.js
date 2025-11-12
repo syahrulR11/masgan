@@ -31,7 +31,7 @@ const masganConfig = {
             shortName: 'Cabang Kalangnyar',
             address: 'Jln. Maulana Yusuf, Kp. Jembatan Keong\nRT 02, RW 02, Desa Aweh\nKec. Kalanganyar, Lebak, Banten\n42312',
             whatsapp: '6285273598919',
-            location: { lat: -6.360048728393978, lng: 106.2416457137535 },
+            location: { lat: -6.360131113971075, lng: 106.24152830386858 },
             deliveryRatePerKm: 2000,
             minDeliveryFee: 8000
         }
