@@ -7,6 +7,213 @@ let currentCaptcha = {
     answer: 0
 };
 
+const CUSTOMER_PROFILE_KEY = 'masganCustomerProfile';
+
+// Branch and delivery configuration
+const masganConfig = {
+    currency: 'Rp',
+    defaultWhatsapp: '6285273598919',
+    branches: [
+        {
+            id: 'kalangnyar',
+            name: 'MasGan Cabang Kalangnyar',
+            shortName: 'Cabang Kalangnyar',
+            address: 'Jln. Maulana Yusuf, Kp. Jembatan Keong, Kalangnyar, Lebak',
+            whatsapp: '6285273598919',
+            location: { lat: -6.380861, lng: 106.162109 },
+            deliveryRatePerKm: 1000,
+            minDeliveryFee: 5000
+        },
+        {
+            id: 'rangkasbitung',
+            name: 'MasGan Cabang Rangkasbitung',
+            shortName: 'Cabang Rangkasbitung',
+            address: 'Jl. Multatuli No. 15, Rangkasbitung',
+            whatsapp: '6285273598919',
+            location: { lat: -6.352764, lng: 106.249546 },
+            deliveryRatePerKm: 1000,
+            minDeliveryFee: 5000
+        },
+        {
+            id: 'cibinong',
+            name: 'MasGan Cabang Cibinong',
+            shortName: 'Cabang Cibinong',
+            address: 'Jl. Tegar Beriman No.1, Pakansari, Kec. Cibinong, Kabupaten Bogor',
+            whatsapp: '6285273598919',
+            location: { lat: -6.484448505246412, lng: 106.84219951294875 },
+            deliveryRatePerKm: 1000,
+            minDeliveryFee: 5000
+        }
+    ]
+};
+
+let customerLocation = null;
+let currentShipping = {
+    branch: null,
+    distanceKm: 0,
+    cost: 0
+};
+
+function formatCurrency(value) {
+    return `Rp ${value.toLocaleString('id-ID')}`;
+}
+
+function calculateDistance(lat1, lon1, lat2, lon2) {
+    const toRad = deg => deg * (Math.PI / 180);
+    const R = 6371; // Earth radius in km
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+    const a = Math.sin(dLat / 2) ** 2 +
+        Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+        Math.sin(dLon / 2) ** 2;
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+}
+
+function getNearestBranch(location) {
+    if (!location) return null;
+    return masganConfig.branches.reduce((nearest, branch) => {
+        if (!branch.location) return nearest;
+        const distanceKm = calculateDistance(
+            location.lat,
+            location.lng,
+            branch.location.lat,
+            branch.location.lng
+        );
+        if (!nearest || distanceKm < nearest.distanceKm) {
+            return { branch, distanceKm };
+        }
+        return nearest;
+    }, null);
+}
+
+function updateLocationStatus(text, isError = false) {
+    const statusEl = document.getElementById('location-status');
+    if (statusEl) {
+        statusEl.textContent = text;
+        statusEl.classList.toggle('text-red-600', isError);
+        if (isError) {
+            statusEl.classList.remove('text-gray-500');
+        } else {
+            statusEl.classList.add('text-gray-600');
+        }
+    }
+}
+
+function recalculateShipping() {
+    if (!customerLocation) {
+        currentShipping = { branch: null, distanceKm: 0, cost: 0 };
+        updateCartDisplay();
+        return;
+    }
+
+    const nearest = getNearestBranch(customerLocation);
+    if (!nearest) {
+        currentShipping = { branch: null, distanceKm: 0, cost: 0 };
+        updateCartDisplay();
+        return;
+    }
+
+    const rate = nearest.branch.deliveryRatePerKm || 0;
+    const minFee = nearest.branch.minDeliveryFee || 0;
+    const calculated = Math.max(Math.ceil(nearest.distanceKm) * rate, minFee);
+
+    currentShipping = {
+        branch: nearest.branch,
+        distanceKm: nearest.distanceKm,
+        cost: calculated
+    };
+
+    updateCartDisplay();
+}
+
+function detectLocation() {
+    if (!navigator.geolocation) {
+        updateLocationStatus('Perangkat tidak mendukung pelacakan lokasi.', true);
+        return;
+    }
+
+    updateLocationStatus('Mengambil lokasi... Mohon izinkan browser.');
+    navigator.geolocation.getCurrentPosition(
+        position => {
+            customerLocation = {
+                lat: position.coords.latitude,
+                lng: position.coords.longitude
+            };
+            updateLocationStatus(`Lokasi tersimpan (${customerLocation.lat.toFixed(4)}, ${customerLocation.lng.toFixed(4)})`);
+            recalculateShipping();
+        },
+        error => {
+            const messages = {
+                1: 'Izin lokasi ditolak. Mohon izinkan untuk menghitung ongkir.',
+                2: 'Lokasi tidak tersedia. Coba lagi.',
+                3: 'Permintaan lokasi kedaluwarsa. Coba lagi.'
+            };
+            updateLocationStatus(messages[error.code] || 'Gagal mengambil lokasi. Coba lagi.', true);
+        },
+        {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 0
+        }
+    );
+}
+
+function getCustomerProfileInputs() {
+    return {
+        nameInput: document.getElementById('customer-name'),
+        phoneInput: document.getElementById('customer-phone'),
+        addressInput: document.getElementById('customer-address')
+    };
+}
+
+function loadCustomerProfile() {
+    try {
+        const savedProfile = localStorage.getItem(CUSTOMER_PROFILE_KEY);
+        if (!savedProfile) return;
+        const profile = JSON.parse(savedProfile);
+        const { nameInput, phoneInput, addressInput } = getCustomerProfileInputs();
+        if (profile.name && nameInput) nameInput.value = profile.name;
+        if (profile.phone && phoneInput) phoneInput.value = profile.phone;
+        if (profile.address && addressInput) addressInput.value = profile.address;
+    } catch (error) {
+        console.warn('Gagal memuat profil pelanggan', error);
+    }
+}
+
+function saveCustomerProfile() {
+    const { nameInput, phoneInput, addressInput } = getCustomerProfileInputs();
+    if (!nameInput || !phoneInput || !addressInput) return;
+
+    const profile = {
+        name: nameInput.value.trim(),
+        phone: phoneInput.value.trim(),
+        address: addressInput.value.trim()
+    };
+
+    if (!profile.name && !profile.phone && !profile.address) {
+        localStorage.removeItem(CUSTOMER_PROFILE_KEY);
+        return;
+    }
+
+    try {
+        localStorage.setItem(CUSTOMER_PROFILE_KEY, JSON.stringify(profile));
+    } catch (error) {
+        console.warn('Gagal menyimpan profil pelanggan', error);
+    }
+}
+
+function initCustomerProfilePersistence() {
+    loadCustomerProfile();
+    const { nameInput, phoneInput, addressInput } = getCustomerProfileInputs();
+    [nameInput, phoneInput, addressInput].forEach(input => {
+        if (input) {
+            input.addEventListener('input', saveCustomerProfile);
+            input.addEventListener('blur', saveCustomerProfile);
+        }
+    });
+}
+
 // Menu configuration
 const menuItems = [
     { name: 'Coconut Original Big', price: 10000, image: 'images/menu/Coconut Original.webp' },
@@ -81,6 +288,7 @@ window.addEventListener('DOMContentLoaded', function() {
         cart = JSON.parse(savedCart);
         updateCartDisplay();
     }
+    initCustomerProfilePersistence();
     // Initialize captcha
     generateCaptcha();
 });
@@ -171,24 +379,26 @@ function toggleCart() {
 function updateCartDisplay() {
     const cartCount = document.getElementById('cart-count');
     const cartItems = document.getElementById('cart-items');
-    const cartTotal = document.getElementById('cart-total');
+    const cartSubtotal = document.getElementById('cart-subtotal');
+    const cartShipping = document.getElementById('cart-shipping');
+    const cartGrandTotal = document.getElementById('cart-grand-total');
+    const branchInfo = document.getElementById('branch-info');
+    const branchDistance = document.getElementById('branch-distance');
 
     // Update cart count
     const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
     cartCount.textContent = totalItems;
 
+    let subtotal = 0;
+
     // Update cart items
     if (cart.length === 0) {
         cartItems.innerHTML = '<p class="text-gray-500 text-center py-8">Keranjang masih kosong</p>';
-        cartTotal.textContent = 'Rp 0';
     } else {
         let itemsHTML = '';
-        let total = 0;
-
         cart.forEach((item, index) => {
             const itemTotal = item.price * item.quantity;
-            total += itemTotal;
-
+            subtotal += itemTotal;
             itemsHTML += `
                 <div class="flex items-center justify-between py-4 border-b border-gray-200">
                     <div class="flex-1">
@@ -213,7 +423,29 @@ function updateCartDisplay() {
         });
 
         cartItems.innerHTML = itemsHTML;
-        cartTotal.textContent = `Rp ${total.toLocaleString('id-ID')}`;
+    }
+
+    const shippingCost = currentShipping.branch ? currentShipping.cost : 0;
+    const shouldApplyShipping = cart.length > 0;
+    const grandTotal = shouldApplyShipping ? subtotal + shippingCost : 0;
+
+    if (cartSubtotal) cartSubtotal.textContent = formatCurrency(subtotal);
+    if (cartShipping) {
+        cartShipping.textContent = currentShipping.branch
+            ? `${formatCurrency(shouldApplyShipping ? shippingCost : 0)} (${currentShipping.branch.shortName || currentShipping.branch.name})`
+            : 'Bagikan lokasi untuk menghitung';
+    }
+    if (cartGrandTotal) cartGrandTotal.textContent = formatCurrency(grandTotal);
+
+    if (branchInfo) {
+        branchInfo.textContent = currentShipping.branch
+            ? currentShipping.branch.shortName || currentShipping.branch.name
+            : 'Menunggu lokasi';
+    }
+    if (branchDistance) {
+        branchDistance.textContent = currentShipping.branch
+            ? `${currentShipping.distanceKm.toFixed(1)} km`
+            : '-';
     }
 }
 
@@ -265,6 +497,11 @@ function checkout() {
         return;
     }
 
+    if (!currentShipping.branch) {
+        alert('Mohon bagikan lokasi untuk menentukan cabang terdekat dan ongkir.');
+        return;
+    }
+
     // Validate captcha
     const captchaAnswer = parseInt(document.getElementById('captcha-answer').value);
     if (isNaN(captchaAnswer) || captchaAnswer !== currentCaptcha.answer) {
@@ -275,27 +512,51 @@ function checkout() {
     }
 
     // Build WhatsApp message
-    let message = `*Pesanan Baru dari ${name}*\n\n`;
-    message += `*Nomor WhatsApp:* ${phone}\n`;
-    message += `*Alamat Pengiriman:*\n${address}\n\n`;
-    message += `*Detail Pesanan:*\n`;
+    let message = `Pesanan Baru *MasGan ${currentShipping.branch.shortName || currentShipping.branch.name}*:\n\n`;
 
-    let total = 0;
+    const orderDate = new Date();
+    const dateFormatter = new Intl.DateTimeFormat('id-ID', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+    });
+    const timeFormatter = new Intl.DateTimeFormat('id-ID', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+    });
+    const formattedTime = timeFormatter.format(orderDate).replace(':', '.');
+
+    message += `Hari Tanggal/Jam: ${dateFormatter.format(orderDate)}, ${formattedTime} WIB\n`;
+    message += `Nama: *${name}*\n`;
+    message += `HP: *${phone}*\n`;
+    message += `Alamat: ${address}\n`;
+    if (customerLocation) {
+        message += `Pin Lokasi: https://www.google.com/maps?q=${customerLocation.lat},${customerLocation.lng}\n`;
+    }
+    message += `Jarak: *${currentShipping.distanceKm.toFixed(1)} km*\n\n`;
+
+    message += `Detail Pesanan:\n`;
+
+    let subtotal = 0;
     cart.forEach((item, index) => {
         const itemTotal = item.price * item.quantity;
-        total += itemTotal;
+        subtotal += itemTotal;
         message += `${index + 1}. ${item.name}\n`;
-        message += `   Qty: ${item.quantity} x Rp ${item.price.toLocaleString('id-ID')} = Rp ${itemTotal.toLocaleString('id-ID')}\n\n`;
+        message += `   Qty: ${item.quantity} x Rp ${item.price.toLocaleString('id-ID')} = Rp ${itemTotal.toLocaleString('id-ID')}\n`;
     });
 
-    message += `*Total: Rp ${total.toLocaleString('id-ID')}*\n\n`;
-    message += `Terima kasih!`;
+    message += `\nSub Total: ${formatCurrency(subtotal)}\n`;
+    message += `Ongkos Kirim: ${formatCurrency(currentShipping.cost)}\n`;
+    message += `Total: ${formatCurrency(subtotal + currentShipping.cost)}\n\n`;
+    message += `Terima kasih!\nSalam *Master Degan Indonesia*`;
 
     // Encode message for URL
     const encodedMessage = encodeURIComponent(message);
 
     // WhatsApp number (without + or -)
-    const whatsappNumber = '6285273598919';
+    const whatsappNumber = currentShipping.branch.whatsapp || masganConfig.defaultWhatsapp;
 
     // Open WhatsApp
     const whatsappURL = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
