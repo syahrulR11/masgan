@@ -135,6 +135,40 @@
                         </div>
 
                         <div class="bg-gray-50 border-2 border-gray-300 rounded-lg p-4 space-y-4">
+                            <div class="flex items-start justify-between">
+                                <p class="text-sm font-semibold text-gray-700">Waktu Pengiriman</p>
+                                <p class="text-xs text-gray-500">Pilih "Nanti" untuk menjadwalkan.</p>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <label class="flex items-center space-x-3 bg-white border-2 border-gray-200 rounded-lg p-3 cursor-pointer hover:border-masgan-green transition-colors">
+                                    <input type="radio" name="delivery-time-option" value="now" class="text-masgan-green focus:ring-masgan-green" checked>
+                                    <div>
+                                        <p class="font-semibold text-masgan-dark-blue">Kirim Sekarang</p>
+                                        <p class="text-xs text-gray-500">Pesanan dikirim secepatnya.</p>
+                                    </div>
+                                </label>
+                                <label class="flex items-center space-x-3 bg-white border-2 border-gray-200 rounded-lg p-3 cursor-pointer hover:border-masgan-green transition-colors">
+                                    <input type="radio" name="delivery-time-option" value="later" class="text-masgan-green focus:ring-masgan-green">
+                                    <div>
+                                        <p class="font-semibold text-masgan-dark-blue">Kirim Nanti</p>
+                                        <p class="text-xs text-gray-500">Pilih tanggal & jam pengiriman.</p>
+                                    </div>
+                                </label>
+                            </div>
+                            <div id="scheduled-delivery-inputs" class="grid grid-cols-1 sm:grid-cols-2 gap-3 hidden">
+                                <div class="space-y-1">
+                                    <label for="delivery-date" class="text-xs font-semibold text-gray-600 uppercase tracking-wide">Tanggal</label>
+                                    <input type="date" id="delivery-date" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-masgan-green focus:outline-none">
+                                </div>
+                                <div class="space-y-1">
+                                    <label for="delivery-time" class="text-xs font-semibold text-gray-600 uppercase tracking-wide">Waktu</label>
+                                    <input type="time" id="delivery-time" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-masgan-green focus:outline-none">
+                                </div>
+                                <p class="text-xs text-gray-500 sm:col-span-2">Pastikan jadwal tidak melebihi jam operasional cabang.</p>
+                            </div>
+                        </div>
+
+                        <div class="bg-gray-50 border-2 border-gray-300 rounded-lg p-4 space-y-4">
                             <p class="text-sm font-semibold text-gray-700">Metode Pembayaran</p>
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <label class="flex items-start space-x-3 bg-white border-2 border-gray-200 rounded-lg p-3 cursor-pointer hover:border-masgan-green transition-colors">

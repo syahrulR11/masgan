@@ -224,6 +224,62 @@ function initPaymentMethodSelection() {
     updateTransferVisibility();
 }
 
+function getLocalDateInputValue(date = new Date()) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
+function getLocalTimeInputValue(date = new Date()) {
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    return `${hours}:${minutes}`;
+}
+
+function enforceScheduledTimeMinimum(dateInput, timeInput) {
+    if (!dateInput || !timeInput) return;
+    const todayValue = getLocalDateInputValue();
+    if (dateInput.value === todayValue) {
+        const minTime = getLocalTimeInputValue();
+        timeInput.min = minTime;
+        if (timeInput.value && timeInput.value < minTime) {
+            timeInput.value = minTime;
+        }
+    } else {
+        timeInput.min = '';
+    }
+}
+
+function initDeliveryTimingControls() {
+    const radios = document.querySelectorAll('input[name="delivery-time-option"]');
+    const scheduleInputs = document.getElementById('scheduled-delivery-inputs');
+    const dateInput = document.getElementById('delivery-date');
+    const timeInput = document.getElementById('delivery-time');
+    if (!radios.length || !scheduleInputs || !dateInput || !timeInput) return;
+
+    dateInput.min = getLocalDateInputValue();
+
+    const updateVisibility = () => {
+        const selected = document.querySelector('input[name="delivery-time-option"]:checked');
+        const showSchedule = selected && selected.value === 'later';
+        scheduleInputs.classList.toggle('hidden', !showSchedule);
+        if (!showSchedule) {
+            dateInput.value = '';
+            timeInput.value = '';
+            timeInput.min = '';
+        } else {
+            enforceScheduledTimeMinimum(dateInput, timeInput);
+        }
+    };
+
+    radios.forEach(radio => radio.addEventListener('change', updateVisibility));
+
+    dateInput.addEventListener('change', () => enforceScheduledTimeMinimum(dateInput, timeInput));
+
+    updateVisibility();
+}
+
 // Menu configuration
 const menuItems = [
     { name: 'Coconut Original Big', price: 10000, image: 'images/menu/Coconut Original.webp' },
@@ -418,6 +474,7 @@ window.addEventListener('DOMContentLoaded', function() {
     }
     initCustomerProfilePersistence();
     initPaymentMethodSelection();
+    initDeliveryTimingControls();
     // Initialize captcha
     generateCaptcha();
 });
@@ -605,6 +662,11 @@ function checkout() {
     const paymentMethodInput = document.querySelector('input[name="payment-method"]:checked');
     const paymentMethod = paymentMethodInput ? paymentMethodInput.value : PAYMENT_METHODS.cod.value;
     const paymentConfig = PAYMENT_METHODS[paymentMethod] || PAYMENT_METHODS.cod;
+    const deliveryOptionInput = document.querySelector('input[name="delivery-time-option"]:checked');
+    const deliveryOption = deliveryOptionInput ? deliveryOptionInput.value : 'now';
+    const deliveryDateInput = document.getElementById('delivery-date');
+    const deliveryTimeInput = document.getElementById('delivery-time');
+    let scheduledDeliveryDate = null;
 
     if (!name) {
         alert('Mohon isi nama Anda');
@@ -634,6 +696,34 @@ function checkout() {
         return;
     }
 
+    if (deliveryOption === 'later') {
+        if (!deliveryDateInput || !deliveryTimeInput) {
+            alert('Form jadwal pengiriman tidak tersedia. Segarkan halaman dan coba lagi.');
+            return;
+        }
+        if (!deliveryDateInput.value) {
+            alert('Mohon pilih tanggal pengiriman yang diinginkan.');
+            deliveryDateInput.focus();
+            return;
+        }
+        if (!deliveryTimeInput.value) {
+            alert('Mohon pilih waktu pengiriman yang diinginkan.');
+            deliveryTimeInput.focus();
+            return;
+        }
+        scheduledDeliveryDate = new Date(`${deliveryDateInput.value}T${deliveryTimeInput.value}`);
+        if (isNaN(scheduledDeliveryDate.getTime())) {
+            alert('Tanggal atau waktu pengiriman tidak valid.');
+            deliveryDateInput.focus();
+            return;
+        }
+        if (scheduledDeliveryDate.getTime() < Date.now()) {
+            alert('Jadwal pengiriman tidak boleh di waktu yang sudah lewat.');
+            deliveryTimeInput.focus();
+            return;
+        }
+    }
+
     // Validate captcha
     const captchaAnswer = parseInt(document.getElementById('captcha-answer').value);
     if (isNaN(captchaAnswer) || captchaAnswer !== currentCaptcha.answer) {
@@ -659,8 +749,12 @@ function checkout() {
         hour12: false
     });
     const formattedTime = timeFormatter.format(orderDate).replace(':', '.');
+    const deliveryScheduleText = scheduledDeliveryDate
+        ? `${dateFormatter.format(scheduledDeliveryDate)}, ${timeFormatter.format(scheduledDeliveryDate).replace(':', '.')} WIB`
+        : 'Secepatnya (kirim sekarang)';
 
     message += `Hari Tanggal/Jam: ${dateFormatter.format(orderDate)}, ${formattedTime} WIB\n`;
+    message += `Jadwal Pengiriman: ${deliveryScheduleText}\n`;
     message += `Nama: *${name}*\n`;
     message += `Metode Pembayaran: *${paymentConfig.label}*\n`;
     if (paymentMethod === PAYMENT_METHODS.transfer.value) {
@@ -707,6 +801,11 @@ function checkout() {
         document.getElementById('customer-phone').value = '';
         document.getElementById('customer-address').value = '';
         document.getElementById('captcha-answer').value = '';
+        const deliveryNowRadio = document.querySelector('input[name="delivery-time-option"][value="now"]');
+        if (deliveryNowRadio) {
+            deliveryNowRadio.checked = true;
+            deliveryNowRadio.dispatchEvent(new Event('change', { bubbles: true }));
+        }
         generateCaptcha();
         toggleCart();
     }, 1000);
