@@ -24,6 +24,7 @@ const PAYMENT_METHODS = {
 const masganConfig = {
     currency: 'Rp',
     defaultWhatsapp: '6285273598919',
+    toleranceDistance: 1.5,
     branches: [
         {
             id: 'kalangnyar',
@@ -58,7 +59,7 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
         Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
         Math.sin(dLon / 2) ** 2;
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c;
+    return (R * c) * masganConfig.toleranceDistance;
 }
 
 function getNearestBranch(location) {
@@ -107,12 +108,12 @@ function recalculateShipping() {
 
     const rate = nearest.branch.deliveryRatePerKm || 0;
     const minFee = nearest.branch.minDeliveryFee || 0;
-    const calculated = Math.max(Math.ceil(nearest.distanceKm) * rate, minFee);
+    const calculated = Math.max(nearest.distanceKm * rate, minFee);
 
     currentShipping = {
         branch: nearest.branch,
         distanceKm: nearest.distanceKm,
-        cost: calculated
+        cost: Math.ceil(calculated / 500) * 500
     };
 
     updateCartDisplay();
