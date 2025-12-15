@@ -28,8 +28,8 @@ const masganConfig = {
     branches: [
         {
             id: 'kalangnyar',
-            name: 'MasGan Cabang Kalangnyar',
-            shortName: 'Cabang Kalangnyar',
+            name: 'MasGan Kalangnyar',
+            shortName: 'MasGan Kalangnyar',
             address: 'Jln. Maulana Yusuf, Kp. Jembatan Keong\nRT 02, RW 02, Desa Aweh\nKec. Kalanganyar, Lebak, Banten\n42312',
             whatsapp: '6285273598919',
             location: { lat: -6.360131113971075, lng: 106.24152830386858 },
@@ -38,8 +38,8 @@ const masganConfig = {
         },
         {
             id: 'multatuli',
-            name: 'MasGan Cabang Multatuli',
-            shortName: 'Cabang Multatuli',
+            name: 'MasGan Multatuli',
+            shortName: 'MasGan Multatuli',
             address: 'Jl. Multatuli No. 35, Muara Ciujung Barat\nRT 02, RW 02\nKec. Rangkasbitung, Lebak, Banten\n42312',
             whatsapp: '6285273598919',
             location: { lat: -6.355380327992399, lng: 106.24700825386431 },
