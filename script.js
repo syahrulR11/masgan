@@ -35,6 +35,16 @@ const masganConfig = {
             location: { lat: -6.360131113971075, lng: 106.24152830386858 },
             deliveryRatePerKm: 2000,
             minDeliveryFee: 8000
+        },
+        {
+            id: 'multatuli',
+            name: 'MasGan Cabang Multatuli',
+            shortName: 'Cabang Multatuli',
+            address: 'Jl. Multatuli No. 35, Muara Ciujung Barat\nRT 02, RW 02\nKec. Rangkasbitung, Lebak, Banten\n42312',
+            whatsapp: '6285273598919',
+            location: { lat: -6.355380327992399, lng: 106.24700825386431 },
+            deliveryRatePerKm: 2000,
+            minDeliveryFee: 8000
         }
     ]
 };
