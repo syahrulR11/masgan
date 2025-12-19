@@ -670,6 +670,8 @@ function checkout() {
     const name = document.getElementById('customer-name').value.trim();
     const phone = document.getElementById('customer-phone').value.trim();
     const address = document.getElementById('customer-address').value.trim();
+    const noteField = document.getElementById('customer-note');
+    const customerNote = noteField ? noteField.value.trim() : '';
     const paymentMethodInput = document.querySelector('input[name="payment-method"]:checked');
     const paymentMethod = paymentMethodInput ? paymentMethodInput.value : PAYMENT_METHODS.cod.value;
     const paymentConfig = PAYMENT_METHODS[paymentMethod] || PAYMENT_METHODS.cod;
@@ -773,6 +775,9 @@ function checkout() {
     }
     message += `HP: *${phone}*\n`;
     message += `Alamat: ${address}\n`;
+    if (customerNote) {
+        message += `Catatan: ${customerNote}\n`;
+    }
     if (customerLocation) {
         message += `Pin Lokasi: https://www.google.com/maps?q=${customerLocation.lat},${customerLocation.lng}\n`;
     }
@@ -811,6 +816,9 @@ function checkout() {
         document.getElementById('customer-name').value = '';
         document.getElementById('customer-phone').value = '';
         document.getElementById('customer-address').value = '';
+        if (noteField) {
+            noteField.value = '';
+        }
         document.getElementById('captcha-answer').value = '';
         const deliveryNowRadio = document.querySelector('input[name="delivery-time-option"][value="now"]');
         if (deliveryNowRadio) {
