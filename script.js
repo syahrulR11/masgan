@@ -318,21 +318,30 @@ const menuItems = [
     { name: 'Coconut Mocha', price: 5000, image: 'images/menu/Coconut Mocha.webp' },
     { name: 'Coconut Pomegranate', price: 5000, image: 'images/menu/Coconut Pomegranate.webp' },
     { name: 'Coconut Passion Fruit', price: 5000, image: 'images/menu/Coconut Passion Fruit.webp' },
-    { name: 'Coconut Milk Banana', price: 5000, image: 'images/menu/Coconut Milk Banana.webp' }
+    { name: 'Coconut Milk Banana', price: 5000, image: 'images/menu/Coconut Milk Banana.webp' },
+    { name: 'Coconut Palm Sugar', price: 5000, image: 'images/menu/Coconut Palm Sugar.webp' },
+    { name: 'Coconut Honey', price: 5000, image: 'images/menu/Coconut Honey.webp' }
+];
+
+const foodItems = [
+    { name: 'Pempek Ikan', price: 10000, image: 'images/menu/Pempek Ikan.webp' },
+    { name: 'Pempek Lenjer', price: 13000, image: 'images/menu/Pempek Lenjer.webp' },
+    { name: 'Pempek Kapal Selam', price: 15000, image: 'images/menu/Pempek Kapal Selam.webp' },
+    { name: 'Tekwan', price: 10000, image: 'images/menu/Tekwan.webp' }
 ];
 
 // Render menu cards dynamically to keep ordering and pricing consistent
-function renderMenu() {
-    const menuGrid = document.getElementById('menu-grid');
-    if (!menuGrid) return;
+function renderMenu(items, containerId) {
+    const menuGrid = document.getElementById(containerId);
+    if (!menuGrid || !Array.isArray(items)) return;
 
-    const cards = menuItems.map((item, index) => {
+    const cards = items.map(item => {
         const priceLabel = `Rp ${item.price.toLocaleString('id-ID')}`;
         const escapedName = item.name.replace(/'/g, "\\'");
         return `
             <div class="menu-card bg-white rounded-2xl shadow-lg overflow-hidden transform transition-all duration-300 hover:scale-105 hover:shadow-2xl">
-                <div class="relative overflow-hidden bg-masgan-dark-blue">
-                    <img src="${item.image}" alt="${item.name}" class="w-full h-48 object-contain relative z-10">
+                <div class="relative overflow-hidden bg-masgan-dark-blue h-48 flex items-center justify-center">
+                    <img src="${item.image}" alt="${item.name}" class="w-full h-full object-contain relative z-10">
                     <div class="absolute top-0 right-0 bg-masgan-green text-white px-3 py-1 rounded-bl-lg font-bold z-20">
                         ${priceLabel}
                     </div>
@@ -476,7 +485,8 @@ function renderAllBranchLists() {
 
 // Load cart from localStorage on page load
 window.addEventListener('DOMContentLoaded', function() {
-    renderMenu();
+    renderMenu(menuItems, 'menu-grid');
+    renderMenu(foodItems, 'food-menu-grid');
     renderAllBranchLists();
     const savedCart = localStorage.getItem('masganCart');
     if (savedCart) {

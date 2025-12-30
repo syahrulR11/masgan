@@ -198,6 +198,33 @@ img[src] {
     background: none;
 }
 
+.qty-input::-webkit-outer-spin-button,
+.qty-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.qty-input {
+    -moz-appearance: textfield;
+}
+
+.food-menu-section {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(220, 242, 228, 0.9));
+}
+
+.food-menu-section::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(16, 158, 51, 0.2), rgba(48, 114, 129, 0.25));
+    z-index: 0;
+}
+
+.food-menu-section > * {
+    position: relative;
+    z-index: 1;
+}
+
 /* Print styles */
 @media print {
     nav, footer, #cart-modal, button {
